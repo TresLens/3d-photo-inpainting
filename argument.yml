@@ -4,7 +4,7 @@ rgb_feat_model_ckpt: checkpoints/color-model.pth
 MiDaS_model_ckpt: MiDaS/model.pt
 fps: 5
 num_frames: 10
-x_shift_range: [0.02]
+x_shift_range: [0.01]
 y_shift_range: [0.00]
 z_shift_range: [0.00]
 traj_types: ['double-straight-line']
