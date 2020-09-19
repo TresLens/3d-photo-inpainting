@@ -104,17 +104,18 @@ disp = [get_disp_image(img_masked, f) for f in frames]
 print('/////////////////////////', disp)
 
 gif_imgs = []
-max_cut = max(disp)
+min_cut, max_cut = -min(disp), max(disp)
+print('Min: ', min_cut, ' Max: ', max_cut)
 rows, cols = frames[0].shape[:-1]
 for i in range(0, len(frames)):
     M = np.float32([[1,0,-disp[i]],[0,1,0]])
     img_mvd = cv2.warpAffine(frames[i],M,(cols,rows))
-    img_mvd = img_mvd[0:rows, max_cut:cols]
+    img_mvd = img_mvd[0:rows, max_cut:cols-min_cut]
     gif_imgs.append(img_mvd)
 gif_imgs += gif_imgs[1:][::-1]
 
 dir_name = f'gifs/frames/{id_file}'
 os.mkdir(dir_name)
 [cv2.imwrite(f'{dir_name}/{i}.jpg', gif_imgs[i]) for i in range(len(gif_imgs))]
-subprocess.run(f'ffmpeg -i {dir_name}/%d.jpg -c:v libx264 -vf fps=15 -pix_fmt yuv420p gifs/{id_file}.mp4', shell=True)
+subprocess.run(f'ffmpeg -i {dir_name}/%d.jpg -c:v libx264 -vf "pad=ceil(iw/2)*2:ceil(ih/2)*2, fps=15" -pix_fmt yuv420p gifs/{id_file}.mp4', shell=True)
 shutil.rmtree(dir_name)
