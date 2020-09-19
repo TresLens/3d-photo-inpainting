@@ -23,15 +23,17 @@ import MiDaS.MiDaS_utils as MiDaS_utils
 from bilateral_filtering import sparse_bilateral_filtering
 
 parser = argparse.ArgumentParser()
+parser.add_argument('--image', type=str)
 parser.add_argument('--config', type=str, default='argument.yml',help='Configure of post processing')
 args = parser.parse_args()
 config = yaml.load(open(args.config, 'r'))
+src_folder = f"{config['src_folder']}/{args.image}"
 if config['offscreen_rendering'] is True:
     vispy.use(app='egl')
 os.makedirs(config['mesh_folder'], exist_ok=True)
 os.makedirs(config['video_folder'], exist_ok=True)
 os.makedirs(config['depth_folder'], exist_ok=True)
-sample_list = get_MiDaS_samples(config['src_folder'], config['depth_folder'], config, config['specific'])
+sample_list = get_MiDaS_samples(src_folder, config['depth_folder'], config, config['specific'])
 normal_canvas, all_canvas = None, None
 
 if isinstance(config["gpu_ids"], int) and (config["gpu_ids"] >= 0):
@@ -50,7 +52,7 @@ for idx in tqdm(range(len(sample_list))):
 
     print(f"Running depth extraction at {time.time()}")
     if config['require_midas'] is True:
-        run_depth([sample['ref_img_fi']], config['src_folder'], config['depth_folder'],
+        run_depth([sample['ref_img_fi']], src_folder, config['depth_folder'],
                   config['MiDaS_model_ckpt'], MonoDepthNet, MiDaS_utils, target_w=640)
     if 'npy' in config['depth_format']:
         config['output_h'], config['output_w'] = np.load(sample['depth_fi']).shape[:2]
