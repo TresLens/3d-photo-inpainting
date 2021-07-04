@@ -6,3 +6,4 @@ networkx==2.3
 Cython==3.0a5
 git+https://github.com/pattern-inc/cynetworkx.git
 scikit-image
+keras-segmentation
