@@ -3,5 +3,6 @@ vispy==0.6.4
 moviepy==1.0.2
 transforms3d==0.3.1
 networkx==2.3
-cynetworkx
+Cython==3.0a5
+git+https://github.com/pattern-inc/cynetworkx.git
 scikit-image
