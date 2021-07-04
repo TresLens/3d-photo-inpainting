@@ -118,4 +118,5 @@ dir_name = f'gifs/frames/{id_file}'
 os.mkdir(dir_name)
 [cv2.imwrite(f'{dir_name}/{i}.jpg', gif_imgs[i]) for i in range(len(gif_imgs))]
 subprocess.run(f'ffmpeg -i {dir_name}/%d.jpg -c:v libx264 -vf "pad=ceil(iw/2)*2:ceil(ih/2)*2, fps=15" -pix_fmt yuv420p gifs/{id_file}.mp4', shell=True)
+# subprocess.run(f'ffmpeg -i gifs/{id_file}.mp4 -filter_complex "[0]reverse[r];[0][r]concat,loop=5:100,setpts=N/15/TB" gifs/{id_file}.mp4', shell=True)
 shutil.rmtree(dir_name)
