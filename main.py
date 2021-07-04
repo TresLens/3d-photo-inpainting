@@ -29,7 +29,7 @@ args = parser.parse_args()
 config = yaml.load(open(args.config, 'r'))
 src_folder = f"{config['src_folder']}/{args.image}"
 if config['offscreen_rendering'] is True:
-    vispy.use(app='egl')
+    vispy.use(app='pyqt5')
 os.makedirs(config['mesh_folder'], exist_ok=True)
 os.makedirs(config['video_folder'], exist_ok=True)
 os.makedirs(config['depth_folder'], exist_ok=True)
