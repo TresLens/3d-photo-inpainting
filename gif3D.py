@@ -26,10 +26,10 @@ class Gif3D:
         self.model = pspnet_101_voc12()
         print('Segmentation model loaded in {} seconds'.format(time() - t1))
 
-    def run_3dgif(self, src_folder, video) -> str:
-        video_src = f'{src_folder}/{video}'
+    def run_3dgif(self, src_folder) -> str:
+        video_src = glob(src_folder + '/*.mp4')[0].replace('\\', '/')
         cap = cv2.VideoCapture(video_src)
-        id_file = video_src.split('/')[1].split('_')[0]
+        id_file = video_src.split('/')[-1].split('_')[0]
 
         frames = []
         while(cap.isOpened()):

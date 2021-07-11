@@ -57,10 +57,10 @@ class Image3D:
 
 
     def run_3dimage(self, src) -> str:
-        src_folder = f"{src}/image"
+        src_folder = src + '/image'
         self.config['mesh_folder'] = src
         self.config['video_folder'] = src
-        self.config['depth_folder'] = src
+        self.config['depth_folder'] = src + '/depth'
 
         sample_list = get_MiDaS_samples(src_folder, self.config['depth_folder'], self.config, self.config['specific'])
         normal_canvas, all_canvas = None, None
@@ -72,7 +72,7 @@ class Image3D:
             mesh_fi = os.path.join(self.config['mesh_folder'], sample['src_pair_name'] +'.ply')
             image = imageio.imread(sample['ref_img_fi'])
             
-            self.config['output_h'], self.config['output_w'] = imageio.imread(sample['depth_fi']).shape[:2]
+            self.config['output_h'], self.config['output_w'] = imageio.imread(sample['depth_fi'], as_gray=True).shape[:2]
             
             frac = self.config['longer_side_len'] / max(self.config['output_h'], self.config['output_w'])
             self.config['output_h'], self.config['output_w'] = int(self.config['output_h'] * frac), int(self.config['output_w'] * frac)

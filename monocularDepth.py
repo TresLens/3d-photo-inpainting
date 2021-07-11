@@ -33,7 +33,7 @@ class MonocularDepth:
     def __init__(self, depthNet = 0) -> None:
         self.device = torch.device("cuda")
         self.whole_size_threshold = 3000  # R_max from the paper
-        self.GPU_threshold = 500 - 32 # Limit for the GPU (NVIDIA RTX 2080), can be adjusted
+        self.GPU_threshold = 2000 - 32 # Limit for the GPU (NVIDIA RTX 2080), can be adjusted
         self.pix2pixsize = 1024
         self.depthNet = depthNet
 
