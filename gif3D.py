@@ -52,13 +52,17 @@ class Gif3D:
         mask = cv2.inRange(seg, np.array([14]), np.array([16]))
         img_masked = cv2.bitwise_and(img_for_seg, img_for_seg, mask=cv2.resize(mask, img_for_seg.shape[:-1][::-1]).astype(np.uint8))
 
-        contours, hierarchy = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-        c = max(contours, key = cv2.contourArea)
-        new_mask = np.zeros_like(mask)
-        cv2.drawContours(new_mask, [c], -1, 255, cv2.FILLED, 1)
-        img_masked = cv2.bitwise_and(img_for_seg, img_for_seg, mask=cv2.resize(new_mask, img_for_seg.shape[:-1][::-1]).astype(np.uint8))
+        contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+        for c in sorted(contours, key=cv2.contourArea)[::-1]:
+            new_mask = np.zeros_like(mask)
+            cv2.drawContours(new_mask, [c], -1, 255, cv2.FILLED, 1)
+            img_masked = cv2.bitwise_and(img_for_seg, img_for_seg, mask=cv2.resize(new_mask, img_for_seg.shape[:-1][::-1]).astype(np.uint8))
 
-        disp = [self.__get_disp_image(img_masked, f) for f in frames]
+            try:
+                disp = [self.__get_disp_image(img_masked, f) for f in frames]
+                break
+            except IndexError:
+                continue
 
         gif_imgs = []
         min_cut, max_cut = -min(disp), max(disp)
@@ -120,3 +124,7 @@ class Gif3D:
             return x2-x1
 
         return int(get_offset(matches[0])) #np.mean([get_offset(m) for m in matches])
+
+if __name__ == '__main__':
+    gf = Gif3D()
+    gf.run_3dgif('image')
