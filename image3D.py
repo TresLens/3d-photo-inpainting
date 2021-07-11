@@ -22,7 +22,10 @@ from bilateral_filtering import sparse_bilateral_filtering
 class Image3D:
     def __init__(self, config) -> None:
         self.config = yaml.load(open(config, 'r'))
-        vispy.use(app='pyqt5')
+        if os.name == 'nt':
+            vispy.use(app='pyqt5')
+        else:
+            vispy.use(app='egl')
 
         if isinstance(self.config['gpu_ids'], int) and (self.config['gpu_ids'] >= 0):
             self.device = self.config['gpu_ids']
