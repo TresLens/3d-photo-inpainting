@@ -9,3 +9,4 @@ scikit-image
 keras-segmentation
 # tensorflow-gpu
 pillow==8.2.0
+imageio-ffmpeg
