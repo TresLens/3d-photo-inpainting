@@ -11,7 +11,7 @@ import shutil
 import subprocess
 from PIL import Image
 from keras_segmentation.pretrained import pspnet_101_voc12
-import argparse
+import gc
 from time import time
 
 def mse(imageA, imageB):
@@ -27,6 +27,7 @@ class Gif3D:
         print('Segmentation model loaded in {} seconds'.format(time() - t1))
 
     def run_3dgif(self, src_folder) -> str:
+        gc.collect()
         video_src = glob(src_folder + '/*.mp4')[0].replace('\\', '/')
         cap = cv2.VideoCapture(video_src)
         id_file = video_src.split('/')[-1].split('_')[0]

@@ -10,7 +10,7 @@ z_shift_range: [0.00]
 traj_types: ['double-straight-line']
 video_postfix: ['output']
 specific: ''
-longer_side_len: 1920
+longer_side_len: 800
 src_folder: image
 depth_folder: depth
 mesh_folder: mesh

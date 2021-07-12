@@ -71,6 +71,7 @@ class MonocularDepth:
         self.r_threshold_value = 0.2
 
     def run_monocularDepth(self, src_dir, result_dir) -> None:
+        torch.cuda.empty()
         dataset = ImageDataset(src_dir, 'test')
         for image_ind, images in enumerate(dataset):
             img = images.rgb_image
