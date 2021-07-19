@@ -26,6 +26,12 @@ class Gif3D:
         self.model = pspnet_101_voc12()
         print('Segmentation model loaded in {} seconds'.format(time() - t1))
 
+    def segmentation(self, img):
+        seg = self.model.predict_segmentation(img)
+        mask = cv2.inRange(seg, np.array([14]), np.array([16]))
+        img_masked = cv2.bitwise_and(img, img, mask=cv2.resize(mask, img.shape[:-1][::-1]).astype(np.uint8))
+        return mask, img_masked
+
     def run_3dgif(self, src_folder) -> str:
         gc.collect()
         video_src = glob(src_folder + '/*.mp4')[0].replace('\\', '/')
@@ -45,13 +51,7 @@ class Gif3D:
 
         img_for_seg = cv2.cvtColor(frames[5], cv2.COLOR_RGB2BGR)
 
-        print('Inferring segmentation')
-        t1 = time()
-        seg = self.model.predict_segmentation(img_for_seg)
-        print('Segmentation done in {} seconds'.format(time() - t1))
-
-        mask = cv2.inRange(seg, np.array([14]), np.array([16]))
-        img_masked = cv2.bitwise_and(img_for_seg, img_for_seg, mask=cv2.resize(mask, img_for_seg.shape[:-1][::-1]).astype(np.uint8))
+        mask, img_masked = self.segmentation(img_for_seg)
 
         contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
         for c in sorted(contours, key=cv2.contourArea)[::-1]:
