@@ -30,7 +30,8 @@ class Processor3D(socketio.ClientNamespace):
         img_np = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
         print('Segmenting...')
         _, img_masked = self.gif.segmentation(img_np)
-        self.emit('result_check_person', data=(img_id, img_masked.any()))
+        self.emit('result_check_person', data=(img_id, bool(img_masked.any())))
+        print('Finished segmenting', img_id)
         # if not img_masked.any():
         #     print('Return False')
         #     return False
@@ -61,7 +62,7 @@ class Processor3D(socketio.ClientNamespace):
         else:
             self.emit('result_3dvideo', data=(img_id, False))
             raise ex
-        # shutil.rmtree(src)
+        shutil.rmtree(src)
 
 if __name__ == '__main__':
     sio.register_namespace(Processor3D('/processor3D'))
