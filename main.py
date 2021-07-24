@@ -1,70 +1,70 @@
 from genericpath import exists
+
+from flask.helpers import make_response
 from monocularDepth import MonocularDepth
 from image3D import Image3D
 from gif3D import Gif3D
 import numpy as np
 from concurrent.futures import ThreadPoolExecutor, wait
-import socketio
-import os
-import cv2
-import shutil
+import os, cv2, shutil, requests
+from flask import Flask, request
+from flask_ngrok import run_with_ngrok
 
-sio = socketio.Client()
+BACKEND_URL = 'http://213.37.41.31'
+TOKEN = '1vfdGKfSmxMZq6fEnhaQkzoDt6x_2SaJpcYpEjCRYDkgGBGSS'
 
-class Processor3D(socketio.ClientNamespace):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.md = MonocularDepth()
-        self.i3d = Image3D('argument.yml')
-        self.gif = Gif3D()
-        self.pool = ThreadPoolExecutor(max_workers=1)
+app = Flask(__name__)
 
-    def on_connect(self):
-        pass
+def register_ngrok_address(ngrok_url):
+    requests.post(BACKEND_URL + '/register_colab', json={'address': ngrok_url})
 
-    def on_disconnect(self):
-        pass
+run_with_ngrok(app, register_ngrok_address, TOKEN)  # Start ngrok when app is run
 
-    def on_check_person(self, img_id, img_binary) -> np.array:
-        nparr = np.frombuffer(img_binary, np.uint8)
-        img_np = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-        print('Segmenting...')
-        _, img_masked = self.gif.segmentation(img_np)
-        self.emit('result_check_person', data=(img_id, bool(img_masked.any())))
-        print('Finished segmenting', img_id)
-        # if not img_masked.any():
-        #     print('Return False')
-        #     return False
-        # result = cv2.imencode('.jpg', img_masked, [int(cv2.IMWRITE_JPEG_QUALITY), 100])[1].tostring()
-        # print('Return image')
-        # return result
+md = MonocularDepth()
+i3d = Image3D('argument.yml')
+gif = Gif3D()
+pool = ThreadPoolExecutor(max_workers=1)
 
-    def __run(self, src):
-        self.md.run_monocularDepth(src + '/image', src + '/depth')
-        self.i3d.run_3dimage(src)
-        self.gif.run_3dgif(src)
+@app.route("/check_person", methods=['POST'])
+def check_person():
+    img_binary = request.files['img_binary'].read()
 
-    def on_run(self, img_id, img_binary):
-        src = f'/tmp/{img_id}'
-        os.makedirs(src + '/image', exist_ok=True)
-        os.makedirs(src + '/depth', exist_ok=True)
+    nparr = np.frombuffer(img_binary, np.uint8)
+    img_np = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+    print('Segmenting...')
+    _, img_masked = gif.segmentation(img_np)
+    return {'result': bool(img_masked.any())}
 
-        with open(src + '/image/' + str(img_id) + '.jpg', 'wb') as fimg:
-            fimg.write(img_binary)
+def run3D(src, img_id):
+    url = BACKEND_URL + '/result_3dvideo/'+img_id
+    try:
+        md.run_monocularDepth(src + '/image', src + '/depth')
+        i3d.run_3dimage(src)
+        gif.run_3dgif(src)
 
-        ex : Exception = self.pool.submit(self.__run, src).exception()
-        
-        if ex is None:
-            final_3dvideo = src + '/' + str(img_id) + '.mp4'
-            if exists(final_3dvideo):
-                with open(final_3dvideo, 'rb') as res:
-                    self.emit('result_3dvideo', data=(img_id, res.read()))
-        else:
-            self.emit('result_3dvideo', data=(img_id, False))
-            raise ex
+        final_3dvideo = src + '/' + str(img_id) + '.mp4'
+        files = {'final_video': open(final_3dvideo, 'rb').read()}
+        requests.post(url, files=files)
+    except:
+        requests.post(url, json={'result': False})
+    finally:
         shutil.rmtree(src)
 
+
+@app.route("/run/<img_id>", methods=['POST'])
+def run(img_id):
+    img_binary = request.files['img_binary']
+
+    src = f'/tmp/{img_id}'
+    os.makedirs(src + '/image', exist_ok=True)
+    os.makedirs(src + '/depth', exist_ok=True)
+
+    with open(src + '/image/' + str(img_id) + '.jpg', 'wb') as fimg:
+        fimg.write(img_binary)
+
+    pool.submit(run3D, src, img_id)
+
+    return True
+
 if __name__ == '__main__':
-    sio.register_namespace(Processor3D('/processor3D'))
-    sio.connect('http://213.37.41.31:80', namespaces='/processor3D')
-    sio.wait()
+    app.run()

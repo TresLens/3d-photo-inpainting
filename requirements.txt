@@ -11,3 +11,4 @@ keras-segmentation
 pillow==8.2.0
 imageio-ffmpeg
 imageio==2.5.0
+git+https://github.com/cTatu/flask-ngrok.git
