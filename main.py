@@ -16,7 +16,7 @@ TOKEN = '1vfdGKfSmxMZq6fEnhaQkzoDt6x_2SaJpcYpEjCRYDkgGBGSS'
 app = Flask(__name__)
 
 def register_ngrok_address(ngrok_url):
-    requests.post(BACKEND_URL + '/register_colab', json={'address': ngrok_url})
+    requests.post(BACKEND_URL + '/register_colab', data={'address': ngrok_url})
 
 run_with_ngrok(app, register_ngrok_address, TOKEN)  # Start ngrok when app is run
 
@@ -46,7 +46,7 @@ def run3D(src, img_id):
         files = {'final_video': open(final_3dvideo, 'rb').read()}
         requests.post(url, files=files)
     except:
-        requests.post(url, json={'result': False})
+        requests.post(url, data={'result': False})
     finally:
         shutil.rmtree(src)
 
