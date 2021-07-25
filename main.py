@@ -64,7 +64,7 @@ def run(img_id):
 
     pool.submit(run3D, src, img_id)
 
-    return True
+    return {'result': True}
 
 if __name__ == '__main__':
     app.run()
