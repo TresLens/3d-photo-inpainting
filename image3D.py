@@ -126,3 +126,4 @@ class Image3D:
                                 image.copy(), copy.deepcopy(sample['int_mtx']), self.config, image,
                                 videos_poses, video_basename, self.config.get('original_h'), self.config.get('original_w'), border=border, depth=depth, normal_canvas=normal_canvas, all_canvas=all_canvas,
                                 mean_loc_depth=mean_loc_depth)
+            torch.cuda.empty_cache()

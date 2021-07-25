@@ -42,7 +42,7 @@ def run3D(src, img_id):
         i3d.run_3dimage(src)
         gif.run_3dgif(src)
 
-        final_3dvideo = src + '/' + str(img_id) + '.mp4'
+        final_3dvideo = src + '/' + str(img_id) + '_output.mp4'
         files = {'final_video': open(final_3dvideo, 'rb').read()}
         requests.post(url, files=files)
     except:
@@ -53,7 +53,7 @@ def run3D(src, img_id):
 
 @app.route("/run/<img_id>", methods=['POST'])
 def run(img_id):
-    img_binary = request.files['img_binary']
+    img_binary = request.files['img_binary'].read()
 
     src = f'/tmp/{img_id}'
     os.makedirs(src + '/image', exist_ok=True)

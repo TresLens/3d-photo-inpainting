@@ -118,6 +118,7 @@ class MonocularDepth:
                                     cv2.resize(imageandpatchs.estimation_updated_image,
                                                (input_resolution[1], input_resolution[0]),
                                                interpolation=cv2.INTER_CUBIC), bits=2, colored=False)
+        torch.cuda.empty_cache()
 
     def __process_patch(self, patch_ind, imageandpatchs):
         patch = imageandpatchs[patch_ind] # patch object
