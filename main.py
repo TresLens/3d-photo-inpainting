@@ -35,8 +35,8 @@ def check_person():
     _, img_masked = gif.segmentation(img_np)
     return {'result': bool(img_masked.any())}
 
-def run3D(src, img_id):
-    url = BACKEND_URL + '/result_3dvideo/'+img_id
+def run3D(src, user_id, img_id):
+    url = BACKEND_URL + f'/result_3dvideo/{user_id}/' + img_id
     try:
         md.run_monocularDepth(src + '/image', src + '/depth')
         i3d.run_3dimage(src)
@@ -51,8 +51,8 @@ def run3D(src, img_id):
         shutil.rmtree(src)
 
 
-@app.route("/run/<img_id>", methods=['POST'])
-def run(img_id):
+@app.route("/run/<user_id>/<img_id>", methods=['POST'])
+def run(user_id, img_id):
     img_binary = request.files['img_binary'].read()
 
     src = f'/tmp/{img_id}'
@@ -62,7 +62,7 @@ def run(img_id):
     with open(src + '/image/' + str(img_id) + '.jpg', 'wb') as fimg:
         fimg.write(img_binary)
 
-    pool.submit(run3D, src, img_id)
+    pool.submit(run3D, src, user_id, img_id)
 
     return {'result': True}
 
