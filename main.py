@@ -11,6 +11,7 @@ from flask import Flask, request
 from flask_ngrok import run_with_ngrok
 from threading import Timer
 import IPython
+import traceback
   
 BACKEND_URL = os.environ['BACKEND_URL']
 TOKEN = '1vfdGKfSmxMZq6fEnhaQkzoDt6x_2SaJpcYpEjCRYDkgGBGSS'
@@ -68,8 +69,9 @@ def run3D(src, user_id, img_id):
         final_3dvideo = src + '/' + str(img_id) + '.mp4'
         files = {'final_video': open(final_3dvideo, 'rb').read()}
         requests.post(url, files=files)
-    except:
-        requests.post(url, data={'result': False})
+    except Exception as e:
+        tr = traceback.format_exc()
+        requests.post(url, data={'result': False, 'traceback': tr, 'exception': str(e)})
     finally:
         shutil.rmtree(src)
 
