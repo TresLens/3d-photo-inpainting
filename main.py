@@ -9,14 +9,32 @@ from concurrent.futures import ThreadPoolExecutor, wait
 import os, cv2, shutil, requests
 from flask import Flask, request
 from flask_ngrok import run_with_ngrok
-
-BACKEND_URL = 'http://213.37.41.31'
+from threading import Timer
+from google.colab import output
+  
+BACKEND_URL = os.environ['BACKEND_URL']
 TOKEN = '1vfdGKfSmxMZq6fEnhaQkzoDt6x_2SaJpcYpEjCRYDkgGBGSS'
 
 app = Flask(__name__)
 
+def shut_down():
+    print('SHUTTING DOWN COLAB')
+    output.eval_js("console.log('SHUT DOWN')")
+
+thread_timer = Timer(60*30, shut_down)
+
+def reset_timer():
+    global thread_timer
+
+    if not thread_timer.isAlive():
+        thread_timer.start()
+    else:
+        thread_timer.cancel()
+        thread_timer = Timer(60*30, shut_down)
+
 def register_ngrok_address(ngrok_url):
     requests.post(BACKEND_URL + '/register_colab', data={'address': ngrok_url})
+    reset_timer()
 
 run_with_ngrok(app, register_ngrok_address, TOKEN)  # Start ngrok when app is run
 
@@ -27,6 +45,7 @@ pool = ThreadPoolExecutor(max_workers=1)
 
 @app.route("/check_person", methods=['POST'])
 def check_person():
+    reset_timer()
     img_binary = request.files['img_binary'].read()
 
     nparr = np.frombuffer(img_binary, np.uint8)
@@ -34,6 +53,10 @@ def check_person():
     print('Segmenting...')
     _, img_masked = gif.segmentation(img_np)
     return {'result': bool(img_masked.any())}
+
+@app.route("/live", methods=['GET'])
+def liveness():
+    return {'result': True}
 
 def run3D(src, user_id, img_id):
     url = BACKEND_URL + f'/result_3dvideo/{user_id}/' + img_id
@@ -53,6 +76,7 @@ def run3D(src, user_id, img_id):
 
 @app.route("/run/<user_id>/<img_id>", methods=['POST'])
 def run(user_id, img_id):
+    reset_timer()
     img_binary = request.files['img_binary'].read()
 
     src = f'/tmp/{img_id}'
