@@ -10,7 +10,7 @@ import os, cv2, shutil, requests
 from flask import Flask, request
 from flask_ngrok import run_with_ngrok
 from threading import Timer
-from google.colab import output
+import IPython
   
 BACKEND_URL = os.environ['BACKEND_URL']
 TOKEN = '1vfdGKfSmxMZq6fEnhaQkzoDt6x_2SaJpcYpEjCRYDkgGBGSS'
@@ -19,7 +19,7 @@ app = Flask(__name__)
 
 def shut_down():
     print('SHUTTING DOWN COLAB')
-    output.eval_js("console.log('SHUT DOWN')")
+    IPython.display.Javascript("console.log('SHUT DOWN')")
 
 thread_timer = Timer(60*30, shut_down)
 
