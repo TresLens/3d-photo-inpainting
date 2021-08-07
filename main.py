@@ -20,7 +20,7 @@ app = Flask(__name__)
 
 def shut_down():
     print('SHUTTING DOWN COLAB')
-    IPython.display.Javascript("console.log('SHUT DOWN')")
+    requests.post(BACKEND_URL + '/close_colab')
 
 thread_timer = Timer(60*25, shut_down)
 
