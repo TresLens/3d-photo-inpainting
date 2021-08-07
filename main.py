@@ -22,7 +22,7 @@ def shut_down():
     print('SHUTTING DOWN COLAB')
     IPython.display.Javascript("console.log('SHUT DOWN')")
 
-thread_timer = Timer(60*30, shut_down)
+thread_timer = Timer(60*25, shut_down)
 
 def reset_timer():
     global thread_timer
@@ -31,7 +31,7 @@ def reset_timer():
         thread_timer.start()
     else:
         thread_timer.cancel()
-        thread_timer = Timer(60*30, shut_down)
+        thread_timer = Timer(60*25, shut_down)
 
 def register_ngrok_address(ngrok_url):
     requests.post(BACKEND_URL + '/register_colab', data={'address': ngrok_url})
